@@ -1,0 +1,1155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quick Math Adventure</title>
+  <style>:root {
+  color-scheme: light;
+  --bg: #ffffff;
+  --fg: #0f172a;
+  --accent: #2563eb;
+  --accent-soft: rgba(37, 99, 235, 0.16);
+  --danger: #dc2626;
+  --danger-soft: rgba(220, 38, 38, 0.18);
+  --success: #16a34a;
+  --success-soft: rgba(22, 163, 74, 0.18);
+  --radius: 20px;
+  --gap: clamp(16px, 3.6vw, 28px);
+  --max-width: min(720px, 95vw);
+  --font-ui: "Atkinson Hyperlegible", "Comic Neue", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: clamp(18px, 2.2vw, 24px) / 1.4 var(--font-ui);
+}
+
+main#app {
+  margin: 0 auto;
+  width: var(--max-width);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--gap);
+  padding: clamp(18px, 5vw, 42px);
+  text-align: center;
+}
+
+main#app > * {
+  width: 100%;
+}
+
+main#app h1 {
+  font-size: clamp(38px, 7vw, 66px);
+  line-height: 1.05;
+  margin: 0;
+}
+
+main#app.uses-grid-progress .progress {
+  display: none;
+}
+
+.progress {
+  width: 100%;
+  display: grid;
+  gap: 12px;
+}
+
+.progress__label {
+  font-size: clamp(16px, 2vw, 20px);
+  letter-spacing: 0.4px;
+  opacity: 0.75;
+  margin: 0;
+}
+
+.progress__track {
+  height: 16px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.12);
+  overflow: hidden;
+}
+
+.progress__bar {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.3s ease;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: var(--accent);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 12px 24px;
+  font-weight: 700;
+  box-shadow: 0 10px 26px rgba(37, 99, 235, 0.18);
+  transition: transform 0.12s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+}
+
+button:active {
+  transform: translateY(1px);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.2);
+}
+
+button.is-ghost {
+  background: #ffffff;
+  color: var(--fg);
+  border: 2px solid #e2e8f0;
+  box-shadow: none;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.game-card {
+  width: 100%;
+  background: #f8fafc;
+  border-radius: var(--radius);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 16px 48px rgba(15, 23, 42, 0.12);
+  padding: clamp(18px, 3.2vw, 26px);
+  display: grid;
+  gap: clamp(16px, 2.8vw, 26px);
+}
+
+.game-feedback {
+  min-height: 32px;
+  font-weight: 600;
+}
+
+.game-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.choice-grid {
+  display: grid;
+  gap: clamp(12px, 2.4vw, 18px);
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.choice-grid__button {
+  border-radius: 22px;
+  border: 2px solid #e2e8f0;
+  background: #ffffff;
+  color: var(--fg);
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  font-size: clamp(30px, 6vw, 54px);
+  min-height: 112px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-shadow: none;
+  transition: transform 0.12s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.choice-grid__button:active {
+  transform: scale(0.97);
+}
+
+.choice-grid__button.is-correct {
+  border-color: var(--success);
+  box-shadow: 0 0 0 6px var(--success-soft);
+}
+
+.choice-grid__button.is-wrong {
+  border-color: var(--danger);
+  animation: choice-shake 0.18s linear 2;
+}
+
+@keyframes choice-shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  50% { transform: translateX(6px); }
+  75% { transform: translateX(-4px); }
+  100% { transform: translateX(0); }
+}
+
+.progress-grid {
+  display: grid;
+  gap: clamp(12px, 2vw, 18px);
+}
+
+.progress-grid__counter {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 10px;
+  font-weight: 800;
+}
+
+.progress-grid__value {
+  font-size: clamp(36px, 7vw, 72px);
+}
+
+.progress-grid__total {
+  font-size: clamp(18px, 3vw, 28px);
+  color: #64748b;
+}
+
+.progress-grid__grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: clamp(4px, 1.2vw, 6px);
+  width: min(420px, 92%);
+  margin: 0 auto;
+}
+
+.progress-grid__cell {
+  aspect-ratio: 1 / 1;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  transition: background 0.2s ease;
+}
+
+.progress-grid__cell--row0 {
+  border-top-width: 2px;
+}
+
+.progress-grid__cell--col0 {
+  border-left-width: 2px;
+}
+
+.progress-grid__cell--row5 {
+  box-shadow: inset 0 2px 0 rgba(15, 23, 42, 0.04);
+}
+
+.progress-grid__cell--col5 {
+  box-shadow: inset 2px 0 0 rgba(15, 23, 42, 0.04);
+}
+
+.progress-grid__cell--ten {
+  background: #dcfce7;
+}
+
+.progress-grid__cell--unit {
+  background: #dbeafe;
+}
+
+@media (max-width: 540px) {
+  main#app {
+    padding: clamp(16px, 6vw, 24px);
+    gap: clamp(16px, 5vw, 24px);
+  }
+
+  .choice-grid__button {
+    min-height: 112px;
+  }
+}
+
+@media (max-height: 720px) {
+  main#app {
+    justify-content: flex-start;
+    padding-block: clamp(16px, 4vh, 28px);
+  }
+
+  .game-card {
+    gap: clamp(16px, 2.5vh, 24px);
+  }
+}
+
+
+#app.quick-math-app {
+  width: min(700px, 94vw);
+  align-items: stretch;
+}
+
+.quick-math-card {
+  align-items: center;
+  text-align: center;
+}
+
+.math-prompt {
+  font-size: clamp(42px, 8vw, 74px);
+  font-weight: 800;
+  margin: 0;
+}
+
+.answer-form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.answer-input {
+  border: 3px solid var(--fg);
+  border-radius: 22px;
+  font-size: clamp(32px, 7vw, 54px);
+  text-align: center;
+  padding: 14px 16px;
+  width: clamp(160px, 42vw, 220px);
+  background: #ffffff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.answer-input.success {
+  border-color: var(--success);
+  box-shadow: 0 0 0 6px var(--success-soft);
+}
+
+.answer-input.error {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 6px var(--danger-soft);
+}
+
+.game-feedback {
+  font-size: clamp(18px, 3vw, 24px);
+}
+
+.game-actions button {
+  min-width: 180px;
+}
+
+.quick-math-card.is-finished .answer-form {
+  display: none;
+}
+</style>
+</head>
+<body>
+  <main id="app" data-game="quick-math"></main>
+  <script>(function () {
+  "use strict";
+
+  function clamp(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  function randInt(max) {
+    return Math.floor(Math.random() * (max + 1));
+  }
+
+  function randRange(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function choice(list) {
+    if (!list || !list.length) return undefined;
+    return list[randInt(list.length - 1)];
+  }
+
+  function shuffle(list) {
+    const out = list.slice();
+    for (let i = out.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [out[i], out[j]] = [out[j], out[i]];
+    }
+    return out;
+  }
+
+  function fitText(element, options) {
+    if (!element) return;
+    const cfg = options || {};
+    const min = Number.isFinite(cfg.min) ? cfg.min : 24;
+    const max = Number.isFinite(cfg.max) ? cfg.max : 60;
+    const step = Number.isFinite(cfg.step) ? Math.max(cfg.step, 1) : 1;
+    const pad = Number.isFinite(cfg.pad) ? cfg.pad : 4;
+
+    element.style.fontSize = `${max}px`;
+    let size = max;
+    let guard = 0;
+    while (
+      guard < 80 &&
+      size > min &&
+      (element.scrollWidth > element.clientWidth + pad ||
+        element.scrollHeight > element.clientHeight + pad)
+    ) {
+      size -= step;
+      element.style.fontSize = `${size}px`;
+      guard += 1;
+    }
+  }
+
+  function createGameCard(className) {
+    const card = document.createElement("section");
+    card.className = "game-card";
+    if (className) card.classList.add(className);
+    return card;
+  }
+
+  function createFeedbackLine() {
+    const el = document.createElement("p");
+    el.className = "game-feedback";
+    el.setAttribute("aria-live", "polite");
+    return el;
+  }
+
+  function createChoiceGrid(options) {
+    const cfg = options || {};
+    const root = document.createElement("div");
+    root.className = "choice-grid";
+    if (cfg.className) root.classList.add(cfg.className);
+    if (cfg.ariaLabel) root.setAttribute("aria-label", cfg.ariaLabel);
+    root.setAttribute("role", cfg.role || "group");
+
+    let buttons = [];
+    let locked = false;
+
+    function unlock() {
+      locked = false;
+      buttons.forEach((button) => {
+        button.disabled = false;
+      });
+    }
+
+    function clear() {
+      root.innerHTML = "";
+      buttons = [];
+    }
+
+    function setOptions(items) {
+      clear();
+      if (!Array.isArray(items)) return;
+      items.forEach((item, index) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "choice-grid__button";
+        if (cfg.buttonClass) btn.classList.add(cfg.buttonClass);
+        if (item && item.className) btn.classList.add(item.className);
+        const label = item && item.label != null ? String(item.label) : "?";
+        btn.textContent = label;
+        if (item && item.ariaLabel) {
+          btn.setAttribute("aria-label", item.ariaLabel);
+        }
+        btn.addEventListener("click", () => {
+          if (locked) return;
+          if (typeof cfg.onSelect === "function") {
+            cfg.onSelect(item, btn, index);
+          }
+        });
+        root.appendChild(btn);
+        buttons.push(btn);
+      });
+
+      window.requestAnimationFrame(() => {
+        buttons.forEach((button) => {
+          fitText(button, cfg.fit);
+        });
+        if (buttons.length && cfg.autoFocus !== false) {
+          buttons[0].focus();
+        }
+      });
+    }
+
+    return {
+      root,
+      setOptions,
+      clear,
+      lock() {
+        locked = true;
+        buttons.forEach((button) => {
+          button.disabled = true;
+        });
+      },
+      unlock,
+      focus(index) {
+        const target = buttons[index || 0];
+        if (target) target.focus();
+      },
+      buttons() {
+        return buttons.slice();
+      }
+    };
+  }
+
+  function createHundredGrid(options) {
+    const cfg = options || {};
+    const total = Math.max(1, Number.isFinite(cfg.total) ? cfg.total : 100);
+    const label = cfg.label || "Progression";
+
+    const root = document.createElement("section");
+    root.className = "progress-grid";
+    root.setAttribute("role", "img");
+    root.setAttribute("aria-label", `${label} 0/${total}`);
+
+    const counter = document.createElement("div");
+    counter.className = "progress-grid__counter";
+
+    const valueEl = document.createElement("span");
+    valueEl.className = "progress-grid__value";
+    valueEl.textContent = "0";
+
+    const totalEl = document.createElement("span");
+    totalEl.className = "progress-grid__total";
+    totalEl.textContent = `/${total}`;
+
+    counter.appendChild(valueEl);
+    counter.appendChild(totalEl);
+
+    const grid = document.createElement("div");
+    grid.className = "progress-grid__grid";
+
+    const cells = [];
+    for (let row = 0; row < 10; row += 1) {
+      for (let col = 0; col < 10; col += 1) {
+        const cell = document.createElement("div");
+        cell.className = "progress-grid__cell";
+        if (row === 0) cell.classList.add("progress-grid__cell--row0");
+        if (col === 0) cell.classList.add("progress-grid__cell--col0");
+        if (row === 5) cell.classList.add("progress-grid__cell--row5");
+        if (col === 5) cell.classList.add("progress-grid__cell--col5");
+        grid.appendChild(cell);
+        cells.push(cell);
+      }
+    }
+
+    const announcer = document.createElement("div");
+    announcer.className = "sr-only";
+    announcer.setAttribute("aria-live", "polite");
+
+    root.appendChild(counter);
+    root.appendChild(grid);
+    root.appendChild(announcer);
+
+    let current = 0;
+
+    function update(value) {
+      const safe = clamp(Math.round(value), 0, total);
+      current = safe;
+      valueEl.textContent = String(safe);
+      root.setAttribute("aria-label", `${label} ${safe}/${total}`);
+
+      const ratio = safe / total;
+      const filled = Math.round(ratio * 100);
+      const tens = Math.floor(filled / 10);
+      const units = filled % 10;
+
+      cells.forEach((cell, index) => {
+        cell.classList.remove(
+          "progress-grid__cell--ten",
+          "progress-grid__cell--unit"
+        );
+        const row = Math.floor(index / 10);
+        const col = index % 10;
+        if (row < tens) {
+          cell.classList.add("progress-grid__cell--ten");
+        } else if (row === tens && col < units) {
+          cell.classList.add("progress-grid__cell--unit");
+        }
+      });
+
+      announcer.textContent = `${label}: ${safe} sur ${total}. ${tens} dizaines et ${units} unités.`;
+    }
+
+    update(0);
+
+    return {
+      root,
+      setValue: update,
+      get value() {
+        return current;
+      }
+    };
+  }
+
+  function createPointTracker(options) {
+    const cfg = options || {};
+    const total = Math.max(1, Number.isFinite(cfg.total) ? cfg.total : 100);
+    const progress = cfg.progress;
+    const grid = cfg.grid;
+    const onChange = typeof cfg.onChange === "function" ? cfg.onChange : null;
+
+    let current = 0;
+
+    function sync(nextValue) {
+      current = clamp(Math.round(Number(nextValue) || 0), 0, total);
+      if (progress && typeof progress.setLevel === "function") {
+        progress.setLevel(current);
+      }
+      if (grid && typeof grid.setValue === "function") {
+        grid.setValue(current);
+      }
+      if (onChange) onChange(current);
+      return current;
+    }
+
+    sync(0);
+
+    return {
+      total,
+      get value() {
+        return current;
+      },
+      set(value) {
+        return sync(value);
+      },
+      add(delta) {
+        return sync(current + Number(delta || 0));
+      },
+      reset() {
+        return sync(0);
+      },
+      isComplete() {
+        return current >= total;
+      }
+    };
+  }
+
+  function createProgress(options) {
+    const total = Math.max(1, options.total || 1);
+    const label = options.label || "Progress";
+    const container = document.createElement("section");
+    container.className = "progress";
+
+    const text = document.createElement("p");
+    text.className = "progress__label";
+    text.setAttribute("aria-live", "polite");
+    const track = document.createElement("div");
+    track.className = "progress__track";
+    const bar = document.createElement("div");
+    bar.className = "progress__bar";
+    bar.style.width = "0%";
+
+    track.appendChild(bar);
+    container.appendChild(text);
+    container.appendChild(track);
+
+    function setLevel(value) {
+      const safe = clamp(value, 0, total);
+      const ratio = safe / total;
+      text.textContent = `${label}: ${safe}/${total}`;
+      bar.style.width = `${Math.round(ratio * 100)}%`;
+    }
+
+    setLevel(0);
+
+    return { root: container, setLevel };
+  }
+
+  const RAW_WORDS = [
+    { w: "chat", img: "🐱", diff: 1 },
+    { w: "vache", img: "🐄", diff: 1 },
+    { w: "mouton", img: "🐑", diff: 1 },
+    { w: "cochon", img: "🐷", diff: 1 },
+    { w: "lapin", img: "🐰", diff: 1 },
+    { w: "loup", img: "🐺", diff: 1 },
+    { w: "poule", img: "🐔", diff: 1 },
+    { w: "poisson", img: "🐟", diff: 1 },
+    { w: "pomme", img: "🍎", diff: 1 },
+    { w: "poire", img: "🍐", diff: 1 },
+    { w: "banane", img: "🍌", diff: 1 },
+    { w: "fraise", img: "🍓", diff: 1 },
+    { w: "melon", img: "🍈", diff: 1 },
+    { w: "pain", img: "🍞", diff: 1 },
+    { w: "biscuit", img: "🍪", diff: 1 },
+    { w: "riz", img: "🍚", diff: 1 },
+    { w: "lait", img: "🥛", diff: 1 },
+    { w: "eau", img: "💧", diff: 1 },
+    { w: "glace", img: "🍦", diff: 1 },
+    { w: "livre", img: "📖", diff: 1 },
+    { w: "stylo", img: "🖊️", diff: 1 },
+    { w: "lampe", img: "💡", diff: 1 },
+    { w: "clé", img: "🔑", diff: 1 },
+    { w: "porte", img: "🚪", diff: 1 },
+    { w: "télé", img: "📺", diff: 1 },
+    { w: "main", img: "✋", diff: 1 },
+    { w: "pied", img: "🦶", diff: 1 },
+    { w: "nez", img: "👃", diff: 1 },
+    { w: "bras", img: "💪", diff: 1 },
+    { w: "maison", img: "🏠", diff: 1 },
+    { w: "jardin", img: "🏡", diff: 1 },
+    { w: "plage", img: "🏖️", diff: 1 },
+    { w: "arbre", img: "🌳", diff: 1 },
+    { w: "fleur", img: "🌸", diff: 1 },
+    { w: "chien", img: "🐶", diff: 2 },
+    { w: "girafe", img: "🦒", diff: 2 },
+    { w: "tigre", img: "🐯", diff: 2 },
+    { w: "hibou", img: "🦉", diff: 2 },
+    { w: "canard", img: "🦆", diff: 2 },
+    { w: "dauphin", img: "🐬", diff: 2 },
+    { w: "serpent", img: "🐍", diff: 2 },
+    { w: "raisin", img: "🍇", diff: 2 },
+    { w: "orange", img: "🍊", diff: 2 },
+    { w: "citron", img: "🍋", diff: 2 },
+    { w: "carotte", img: "🥕", diff: 2 },
+    { w: "mangue", img: "🥭", diff: 2 },
+    { w: "kiwi", img: "🥝", diff: 2 },
+    { w: "coco", img: "🥥", diff: 2 },
+    { w: "crayon", img: "✏️", diff: 2 },
+    { w: "règle", img: "📏", diff: 2 },
+    { w: "sac", img: "🎒", diff: 2 },
+    { w: "tasse", img: "☕", diff: 2 },
+    { w: "casque", img: "🎧", diff: 2 },
+    { w: "loupe", img: "🔍", diff: 2 },
+    { w: "vélo", img: "🚲", diff: 2 },
+    { w: "bus", img: "🚌", diff: 2 },
+    { w: "moto", img: "🏍️", diff: 2 },
+    { w: "taxi", img: "🚕", diff: 2 },
+    { w: "soleil", img: "☀️", diff: 2 },
+    { w: "vent", img: "💨", diff: 2 },
+    { w: "dent", img: "🦷", diff: 2 },
+    { w: "cœur", img: "❤️", diff: 2 },
+    { w: "renard", img: "🦊", diff: 3 },
+    { w: "pingouin", img: "🐧", diff: 3 },
+    { w: "grenouille", img: "🐸", diff: 3 },
+    { w: "requin", img: "🦈", diff: 3 },
+    { w: "kangourou", img: "🦘", diff: 3 },
+    { w: "crocodile", img: "🐊", diff: 3 },
+    { w: "maïs", img: "🌽", diff: 3 },
+    { w: "avocat", img: "🥑", diff: 3 },
+    { w: "poivron", img: "🫑", diff: 3 },
+    { w: "brocoli", img: "🥦", diff: 3 },
+    { w: "aubergine", img: "🍆", diff: 3 },
+    { w: "concombre", img: "🥒", diff: 3 },
+    { w: "croissant", img: "🥐", diff: 3 },
+    { w: "sushi", img: "🍣", diff: 3 },
+    { w: "soupe", img: "🥣", diff: 3 },
+    { w: "cahier", img: "📓", diff: 3 },
+    { w: "marteau", img: "🔨", diff: 3 },
+    { w: "scie", img: "🪚", diff: 3 },
+    { w: "casquette", img: "🧢", diff: 3 },
+    { w: "tram", img: "🚊", diff: 3 },
+    { w: "métro", img: "🚇", diff: 3 },
+    { w: "voiture", img: "🚗", diff: 3 },
+    { w: "bateau", img: "⛵", diff: 3 },
+    { w: "gare", img: "🚉", diff: 3 },
+    { w: "forêt", img: "🌲", diff: 3 },
+    { w: "neige", img: "❄️", diff: 3 },
+    { w: "chevreuil", img: "🦌", diff: 4 },
+    { w: "écureuil", img: "🐿️", diff: 4 },
+    { w: "éléphant", img: "🐘", diff: 4 },
+    { w: "perroquet", img: "🦜", diff: 4 },
+    { w: "aigle", img: "🦅", diff: 4 },
+    { w: "phoque", img: "🦭", diff: 4 },
+    { w: "oignon", img: "🧅", diff: 4 },
+    { w: "beurre", img: "🧈", diff: 4 },
+    { w: "œuf", img: "🥚", diff: 4 },
+    { w: "gâteau", img: "🎂", diff: 4 },
+    { w: "brosse à dents", img: "🪥", diff: 4 },
+    { w: "tournevis", img: "🪛", diff: 4 },
+    { w: "ordinateur", img: "💻", diff: 4 },
+    { w: "étoile", img: "⭐", diff: 4 },
+    { w: "rivière", img: "🏞️", diff: 4 },
+    { w: "océan", img: "🌊", diff: 4 },
+    { w: "hôpital", img: "🏥", diff: 4 },
+    { w: "château", img: "🏰", diff: 4 },
+    { w: "cheminée", img: "🧱", diff: 4 },
+    { w: "rhinocéros", img: "🦏", diff: 5 },
+    { w: "hippopotame", img: "🦛", diff: 5 },
+    { w: "hélicoptère", img: "🚁", diff: 5 },
+    { w: "montgolfière", img: "🎈", diff: 5 },
+    { w: "astronaute", img: "🧑‍🚀", diff: 5 },
+    { w: "planète", img: "🪐", diff: 5 }
+  ];
+
+  const GRAPHEME_POOL = [
+    "ch",
+    "ou",
+    "on",
+    "an",
+    "ai",
+    "oi",
+    "eu",
+    "au",
+    "eau",
+    "ill",
+    "gn",
+    "in",
+    "ain",
+    "ion",
+    "ien",
+    "ph",
+    "qu",
+    "é",
+    "è",
+    "ê",
+    "œ",
+    "tt",
+    "ss",
+    "rr"
+  ];
+
+  function buildVocabulary() {
+    const seenWords = new Set();
+    const seenEmoji = new Set();
+    const words = [];
+
+    function startSound(word) {
+      const match = GRAPHEME_POOL.find((grapheme) => word.startsWith(grapheme));
+      return match || word.slice(0, 1);
+    }
+
+    RAW_WORDS.forEach((entry) => {
+      if (!entry || !entry.w || !entry.img) return;
+      const word = String(entry.w).toLowerCase().trim();
+      const emoji = String(entry.img).trim();
+      if (!word || !emoji) return;
+      if (seenWords.has(word) || seenEmoji.has(emoji)) return;
+      const diff = clamp(Math.round(Number(entry.diff) || 1), 1, 5);
+      const graphemes = GRAPHEME_POOL.filter((item) => word.includes(item));
+      words.push({
+        w: word,
+        img: emoji,
+        diff,
+        initial: word[0],
+        start: startSound(word),
+        graphemes
+      });
+      seenWords.add(word);
+      seenEmoji.add(emoji);
+    });
+
+    function byDifficulty(level, spread) {
+      const span = Number.isFinite(spread) ? Math.max(0, spread) : 0;
+      const min = clamp(Math.floor(level - span), 1, 5);
+      const max = clamp(Math.ceil(level + span), 1, 5);
+      return words.filter((item) => item.diff >= min && item.diff <= max);
+    }
+
+    return {
+      all: words,
+      graphemes: GRAPHEME_POOL.slice(),
+      byDifficulty(level, spread) {
+        return byDifficulty(level, spread || 0);
+      },
+      random(level, spread) {
+        const pool = byDifficulty(level || 1, spread || 0);
+        return choice(pool.length ? pool : words);
+      },
+      sample(level, size, spread, options) {
+        const targetSize = Math.max(1, Number(size) || 1);
+        const pool = byDifficulty(level || 1, spread || 0);
+        const source = pool.length ? pool : words;
+        const exclude =
+          options && Array.isArray(options.exclude)
+            ? new Set(options.exclude.map((item) => (item && item.w) || item))
+            : null;
+        const filtered = exclude
+          ? source.filter((item) => !exclude.has(item.w))
+          : source.slice();
+        return shuffle(filtered).slice(0, targetSize);
+      },
+      withGrapheme(grapheme, options) {
+        if (!grapheme) return [];
+        const needle = String(grapheme).toLowerCase();
+        const pool = options && options.level ? byDifficulty(options.level, options.spread || 0) : words;
+        return pool.filter((item) => item.w.includes(needle));
+      },
+      startingWith(prefix, options) {
+        if (!prefix) return [];
+        const needle = String(prefix).toLowerCase();
+        const pool = options && options.level ? byDifficulty(options.level, options.spread || 0) : words;
+        return pool.filter((item) => item.w.startsWith(needle));
+      }
+    };
+  }
+
+  const vocabulary = buildVocabulary();
+
+  function mountGame({ title, totalLevels, onReady }) {
+    const app = document.getElementById("app");
+    if (!app) throw new Error("Missing #app root element");
+
+    const titleEl = document.createElement("h1");
+    titleEl.id = "title";
+    titleEl.textContent = title;
+    app.appendChild(titleEl);
+
+    const progress = createProgress({ label: "Progress", total: totalLevels });
+    app.appendChild(progress.root);
+
+    const gameHost = document.createElement("section");
+    gameHost.id = "game";
+    gameHost.setAttribute("role", "region");
+    gameHost.setAttribute("aria-live", "polite");
+    app.appendChild(gameHost);
+
+    const api = {
+      progress,
+      gameHost,
+      resetFocus(target) {
+        window.requestAnimationFrame(() => {
+          if (target && typeof target.focus === "function") {
+            target.focus();
+          }
+        });
+      },
+      createHundredGrid
+    };
+
+    if (typeof onReady === "function") {
+      onReady(api);
+    }
+  }
+
+  window.Jeux = {
+    mountGame,
+    createProgress,
+    createHundredGrid,
+    createPointTracker,
+    vocabulary,
+    utils: {
+      clamp,
+      choice,
+      shuffle,
+      fitText,
+      randInt,
+      randRange
+    },
+    ui: {
+      createGameCard,
+      createFeedbackLine,
+      createChoiceGrid
+    }
+  };
+})();
+</script>
+  <script>(function (Jeux) {
+  "use strict";
+
+  const TOTAL_POINTS = 100;
+  const TARGET_ROUNDS = 30;
+  const STEP = TOTAL_POINTS / TARGET_ROUNDS;
+  const WAIT_MS = 420;
+
+  const { utils, ui, createPointTracker } = Jeux;
+  const { clamp, choice, randInt } = utils;
+  const { createGameCard, createFeedbackLine } = ui;
+
+  function buildProblem(stage) {
+    let a;
+    let b;
+    let op;
+    let answer;
+    if (stage < 10) {
+      op = "+";
+      a = randInt(5);
+      b = randInt(5);
+      answer = a + b;
+    } else if (stage < 20) {
+      op = Math.random() < 0.7 ? "+" : "-";
+      a = randInt(10);
+      b = randInt(10);
+      if (op === "-" && b > a) [a, b] = [b, a];
+      answer = op === "+" ? a + b : a - b;
+    } else if (stage < 28) {
+      op = Math.random() < 0.6 ? "+" : "-";
+      a = randInt(12);
+      b = randInt(12);
+      if (op === "-" && b > a) [a, b] = [b, a];
+      answer = op === "+" ? a + b : a - b;
+    } else if (stage < 29) {
+      op = "×";
+      a = 2 + randInt(2);
+      b = 2 + randInt(4);
+      answer = a * b;
+    } else {
+      op = "×";
+      a = 4;
+      b = 6;
+      answer = a * b;
+    }
+    return { a, b, op, answer };
+  }
+
+  function formatPrompt(problem) {
+    return `${problem.a} ${problem.op} ${problem.b} =`;
+  }
+
+  Jeux.mountGame({
+    title: "Quick Math Adventure",
+    totalLevels: TOTAL_POINTS,
+    onReady({ progress, gameHost, resetFocus, createHundredGrid }) {
+      const app = document.getElementById("app");
+      app.classList.add("uses-grid-progress", "quick-math-app");
+
+      const card = createGameCard("quick-math-card");
+
+      const grid = createHundredGrid({ total: TOTAL_POINTS, label: "Progression" });
+      const tracker = createPointTracker({ total: TOTAL_POINTS, progress, grid });
+
+      const promptEl = document.createElement("p");
+      promptEl.className = "math-prompt";
+      promptEl.textContent = "Prêt ?";
+
+      const form = document.createElement("form");
+      form.className = "answer-form";
+      form.setAttribute("autocomplete", "off");
+
+      const input = document.createElement("input");
+      input.type = "number";
+      input.inputMode = "numeric";
+      input.placeholder = "?";
+      input.className = "answer-input";
+      input.setAttribute("aria-label", "Ta réponse");
+
+      const submit = document.createElement("button");
+      submit.type = "submit";
+      submit.textContent = "Valider";
+
+      form.appendChild(input);
+      form.appendChild(submit);
+
+      const feedback = createFeedbackLine();
+
+      const replay = document.createElement("button");
+      replay.type = "button";
+      replay.id = "replay";
+      replay.textContent = "Recommencer";
+      replay.classList.add("is-ghost");
+      replay.style.display = "none";
+
+      const actions = document.createElement("div");
+      actions.className = "game-actions";
+      actions.appendChild(replay);
+
+      card.appendChild(grid.root);
+      card.appendChild(promptEl);
+      card.appendChild(form);
+      card.appendChild(feedback);
+      card.appendChild(actions);
+
+      gameHost.appendChild(card);
+
+      const successMessages = ["Bravo !", "Bien vu !", "Gagné !", "Continue !"];
+      const retryMessages = ["Réessaie", "Presque", "Encore", "Regarde bien"];
+
+      let streak = 0;
+      let expected = null;
+      let finished = false;
+      let busy = false;
+      let roundStart = 0;
+
+      function stageIndex() {
+        return clamp(Math.floor(tracker.value / STEP), 0, TARGET_ROUNDS - 1);
+      }
+
+      function setInputState(state) {
+        input.classList.remove("success", "error");
+        if (state) input.classList.add(state);
+      }
+
+      function showFeedback(message) {
+        feedback.textContent = message || "";
+      }
+
+      function computeReward(elapsed) {
+        let gain = STEP;
+        if (elapsed < 1.8) gain += 2;
+        else if (elapsed < 3.0) gain += 1;
+        if (streak >= 3) gain += 1;
+        return gain;
+      }
+
+      function computePenalty() {
+        if (tracker.value > 70) return 6;
+        if (tracker.value > 40) return 5;
+        return 4;
+      }
+
+      function finish() {
+        finished = true;
+        busy = true;
+        card.classList.add("is-finished");
+        promptEl.textContent = "Fantastique !";
+        showFeedback("Tu as rempli la grille.");
+        replay.style.display = "inline-flex";
+        resetFocus(replay);
+      }
+
+      function nextProblem(delay) {
+        busy = true;
+        window.setTimeout(() => {
+          if (finished) return;
+          const stage = stageIndex();
+          const problem = buildProblem(stage);
+          expected = problem.answer;
+          promptEl.textContent = formatPrompt(problem);
+          input.value = "";
+          setInputState("");
+          showFeedback("");
+          resetFocus(input);
+          roundStart = performance.now();
+          busy = false;
+        }, delay || 0);
+      }
+
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        if (busy || finished) return;
+        const value = parseInt(input.value, 10);
+        if (Number.isNaN(value)) {
+          setInputState("error");
+          showFeedback(choice(retryMessages));
+          return;
+        }
+        busy = true;
+        if (value === expected) {
+          streak += 1;
+          const elapsed = (performance.now() - roundStart) / 1000;
+          const gain = computeReward(elapsed);
+          tracker.add(gain);
+          setInputState("success");
+          showFeedback(choice(successMessages));
+          if (tracker.isComplete()) {
+            finish();
+            return;
+          }
+          nextProblem(WAIT_MS);
+        } else {
+          streak = 0;
+          const penalty = computePenalty();
+          tracker.add(-penalty);
+          setInputState("error");
+          showFeedback(choice(retryMessages));
+          nextProblem(WAIT_MS);
+        }
+      });
+
+      replay.addEventListener("click", function () {
+        finished = false;
+        busy = false;
+        card.classList.remove("is-finished");
+        replay.style.display = "none";
+        streak = 0;
+        setInputState("");
+        showFeedback("");
+        tracker.reset();
+        nextProblem(0);
+      });
+
+      tracker.reset();
+      nextProblem(0);
+    }
+  });
+})(window.Jeux);
+</script>
+</body>
+</html>

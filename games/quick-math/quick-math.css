@@ -1,0 +1,56 @@
+#app.quick-math-app {
+  width: min(700px, 94vw);
+  align-items: stretch;
+}
+
+.quick-math-card {
+  align-items: center;
+  text-align: center;
+}
+
+.math-prompt {
+  font-size: clamp(42px, 8vw, 74px);
+  font-weight: 800;
+  margin: 0;
+}
+
+.answer-form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.answer-input {
+  border: 3px solid var(--fg);
+  border-radius: 22px;
+  font-size: clamp(32px, 7vw, 54px);
+  text-align: center;
+  padding: 14px 16px;
+  width: clamp(160px, 42vw, 220px);
+  background: #ffffff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.answer-input.success {
+  border-color: var(--success);
+  box-shadow: 0 0 0 6px var(--success-soft);
+}
+
+.answer-input.error {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 6px var(--danger-soft);
+}
+
+.game-feedback {
+  font-size: clamp(18px, 3vw, 24px);
+}
+
+.game-actions button {
+  min-width: 180px;
+}
+
+.quick-math-card.is-finished .answer-form {
+  display: none;
+}

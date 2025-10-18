@@ -1,0 +1,46 @@
+#app.number-ladder-app {
+  width: min(720px, 94vw);
+  align-items: stretch;
+}
+
+.number-ladder-card {
+  align-items: center;
+}
+
+.ladder-prompt {
+  font-size: clamp(32px, 6vw, 52px);
+  font-weight: 700;
+  margin: 0;
+}
+
+.ladder-sequence {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.ladder-step {
+  min-width: clamp(60px, 12vw, 82px);
+  min-height: clamp(60px, 12vw, 82px);
+  border-radius: 18px;
+  border: 2px solid #e2e8f0;
+  background: #ffffff;
+  font-weight: 800;
+  font-size: clamp(28px, 6vw, 44px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ladder-step--missing {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.ladder-choices .choice-grid__button {
+  font-size: clamp(28px, 6vw, 48px);
+  min-height: 112px;
+}

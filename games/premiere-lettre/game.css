@@ -1,0 +1,50 @@
+#app.first-letter-app {
+  width: min(720px, 95vw);
+  align-items: stretch;
+  gap: clamp(16px, 3vw, 26px);
+}
+
+.first-letter-card {
+  align-items: center;
+  text-align: center;
+}
+
+.first-letter-card .letter-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(320px, 72%);
+  margin: 0 auto;
+  border-radius: 26px;
+  border: 3px solid #0f172a;
+  background: #ffffff;
+  font-weight: 900;
+  font-size: clamp(56px, 12vw, 112px);
+  padding: clamp(18px, 4vw, 28px);
+  letter-spacing: 2px;
+}
+
+.first-letter-card .letter-badge span {
+  display: block;
+}
+
+.first-letter-instruction {
+  margin: 0;
+  font-size: clamp(20px, 4vw, 26px);
+  color: #1f2937;
+}
+
+.first-letter-note {
+  margin: 0;
+  font-size: clamp(16px, 3vw, 20px);
+  color: #475569;
+}
+
+.first-letter-choices .choice-grid__button {
+  font-size: clamp(32px, 7vw, 56px);
+  min-height: 120px;
+}
+
+.first-letter-feedback {
+  min-height: 28px;
+}
